@@ -17,19 +17,17 @@ from PIL import ImageGrab
 # Import dataset
 os.chdir(sys._MEIPASS)
 data = np.array(pd.read_csv('train.csv'))
+testdata = np.array(pd.read_csv('test.csv'))
 
 # Split train/test sets
-trainX = data[0:900, 1:]
-trainY = data[0:900, 0]
-testX = data[200:1100, 1:]
-testY = data[200:1100, 0]
+trainX = data[0:200, 1:]
+trainY = data[0:200, 0]
+testX = testdata[0:200, 1:]
+testY = data[0:200, 0]
 
 # Create models and train them
-Gamma = 0.001
-C = 1
-model = SVC(kernel='poly', C=C, gamma=Gamma)
+model = SVC(kernel='linear')
 model.fit(trainX, trainY)
-predY = model.predict(testX)
 
 
 # Create GUI
