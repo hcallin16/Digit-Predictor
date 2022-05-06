@@ -5,19 +5,19 @@
 # Imports
 import os
 import sys
-import tkinter as tk
+import tkinter as tk    # Used for GUI
+import numpy as np   # Used for arrays
+from sklearn.svm import SVC   # Used for the SVM model
+import pandas as pd   # Used to read .csv files
+import win32gui   # Used to grab drawn image
+import PIL   # Pillow used for image processing
 import PIL.ImageOps
-import numpy as np
-from sklearn.svm import SVC
-import pandas as pd
-import win32gui
-import PIL
-from PIL import ImageGrab
+from PIL import ImageGrab   # Used to grab drawn image
 
 # Import dataset
-os.chdir(sys._MEIPASS)
-data = np.array(pd.read_csv('train.csv'))
-testdata = np.array(pd.read_csv('test.csv'))
+#os.chdir(sys._MEIPASS)  # Changes filepath for PyInstaller
+data = np.array(pd.read_csv('train.csv'))   # Import train dataset
+testdata = np.array(pd.read_csv('test.csv'))    # Import test dataset
 
 # Split train/test sets
 trainX = data[0:200, 1:]
@@ -25,13 +25,13 @@ trainY = data[0:200, 0]
 testX = testdata[0:200, 1:]
 testY = data[0:200, 0]
 
-# Create models and train them
-model = SVC(kernel='linear')
-model.fit(trainX, trainY)
+# Create and train the model
+model = SVC(kernel='linear')    # Creates linear SVM model
+model.fit(trainX, trainY)   # Fit the model
 
 
 # Create GUI
-class App(tk.Tk):
+class GUI(tk.Tk):
 
     # Initializing GUI elements
     def __init__(self):
@@ -40,31 +40,30 @@ class App(tk.Tk):
         self.x = self.y = 0
 
         # Creating elements
-        self.canvas = tk.Canvas(self, width=300, height=300, bg="white", cursor="cross")
-        self.label = tk.Label(self, text="Prediction: ", font=("Helvetica", 48))
-        self.classify_btn = tk.Button(self, text="Predict", command=self.classify_handwriting)
-        self.button_clear = tk.Button(self, text="Clear", command=self.clear_all)
+        self.canvas = tk.Canvas(self, width=300, height=300, bg="white", cursor="cross")    # Creates canvas and cursor
+        self.label = tk.Label(self, text="Prediction: ", font=("Helvetica", 48))    # Creates 'prediction: ' text
+        self.predict_button = tk.Button(self, text="Predict", command=self.predict_digit)  # Creates predict button
+        self.clear_button = tk.Button(self, text="Clear", command=self.clear_canvas)   # Creates clear button
 
         # Grid structure
-        self.canvas.grid(row=3, column=0, pady=2)
-        self.label.grid(row=0, column=0, pady=2, padx=90)
-        self.classify_btn.grid(row=1, column=0, pady=2, padx=4)
-        self.button_clear.grid(row=2, column=0, pady=2)
+        self.canvas.grid(row=3, column=0, pady=2)   # Grid location for canvas
+        self.label.grid(row=0, column=0, pady=2, padx=90)   # Grid for label
+        self.predict_button.grid(row=1, column=0, pady=2, padx=4)   # Grid location for predict button
+        self.clear_button.grid(row=2, column=0, pady=2)   # Grid location for clear buttom
 
-        # self.canvas.bind("<Motion>", self.start_pos)
         self.canvas.bind("<B1-Motion>", self.draw_lines)
 
     # Clear canvas
-    def clear_all(self):
-        self.canvas.delete("all")
+    def clear_canvas(self):
+        self.canvas.delete("all")   # Clears anything drawn on the canvas
 
     # Get and process drawn image
-    def classify_handwriting(self):
+    def predict_digit(self):
 
         # Get the drawn image
         HWND = self.canvas.winfo_id()
-        rect = win32gui.GetWindowRect(HWND)
-        img = ImageGrab.grab(rect)
+        rect = win32gui.GetWindowRect(HWND)   # Locates the drawn image area
+        img = ImageGrab.grab(rect)   # Grabs the image itself
 
         # Image processing
         img = img.resize((28, 28))  # Resize image to 28x28
@@ -81,10 +80,11 @@ class App(tk.Tk):
     def draw_lines(self, event):
         self.x = event.x
         self.y = event.y
-        r = 8
-        self.canvas.create_oval(self.x - r, self.y - r, self.x + r, self.y + r, fill='black')
+        r = 8   # Radius of drawn lines
+        self.canvas.create_oval(self.x - r, self.y - r, self.x + r, self.y + r, fill='black')   # Creates ovals where
+        # user draws
 
 
 # Calls the GUI
-app = App()
+app = GUI()
 tk.mainloop()
